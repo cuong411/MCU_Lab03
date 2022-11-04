@@ -22,7 +22,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "global.h"
+#include "software_timer.h"
+#include "button.h"
+#include "display_7_SEG.h"
+#include "fsm_automatic.h"
+#include "fsm_modify.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,42 +61,7 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void display7SEG1(int num)
-{
-	if(num < 0 || num > 9) return;
-	if(num == 1 || num == 4) HAL_GPIO_WritePin(a1_GPIO_Port, a1_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(a1_GPIO_Port, a1_Pin, GPIO_PIN_RESET);
-	if(num == 5 || num == 6) HAL_GPIO_WritePin(b1_GPIO_Port, b1_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(b1_GPIO_Port, b1_Pin, GPIO_PIN_RESET);
-	if(num == 2) HAL_GPIO_WritePin(c1_GPIO_Port, c1_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(c1_GPIO_Port, c1_Pin, GPIO_PIN_RESET);
-	if(num == 1 || num == 4 || num == 7) HAL_GPIO_WritePin(d1_GPIO_Port, d1_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(d1_GPIO_Port, d1_Pin, GPIO_PIN_RESET);
-	if(num % 2 == 1 || num == 4) HAL_GPIO_WritePin(e1_GPIO_Port, e1_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(e1_GPIO_Port, e1_Pin, GPIO_PIN_RESET);
-	if(num == 1 || num == 2 || num == 3 || num == 7) HAL_GPIO_WritePin(f1_GPIO_Port, f1_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(f1_GPIO_Port, f1_Pin, GPIO_PIN_RESET);
-	if(num == 0 || num == 1 || num == 7) HAL_GPIO_WritePin(g1_GPIO_Port, g1_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(g1_GPIO_Port, g1_Pin, GPIO_PIN_RESET);
-}
-void display7SEG2(int num)
-{
-	if(num < 0 || num > 9) return;
-	if(num == 1 || num == 4) HAL_GPIO_WritePin(a2_GPIO_Port, a2_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(a2_GPIO_Port, a2_Pin, GPIO_PIN_RESET);
-	if(num == 5 || num == 6) HAL_GPIO_WritePin(b2_GPIO_Port, b2_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(b2_GPIO_Port, b2_Pin, GPIO_PIN_RESET);
-	if(num == 2) HAL_GPIO_WritePin(c2_GPIO_Port, c2_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(c2_GPIO_Port, c2_Pin, GPIO_PIN_RESET);
-	if(num == 1 || num == 4 || num == 7) HAL_GPIO_WritePin(d2_GPIO_Port, d2_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(d2_GPIO_Port, d2_Pin, GPIO_PIN_RESET);
-	if(num % 2 == 1 || num == 4) HAL_GPIO_WritePin(e2_GPIO_Port, e2_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(e2_GPIO_Port, e2_Pin, GPIO_PIN_RESET);
-	if(num == 1 || num == 2 || num == 3 || num == 7) HAL_GPIO_WritePin(f2_GPIO_Port, f2_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(f2_GPIO_Port, f2_Pin, GPIO_PIN_RESET);
-	if(num == 0 || num == 1 || num == 7) HAL_GPIO_WritePin(g2_GPIO_Port, g2_Pin, GPIO_PIN_SET);
-	else HAL_GPIO_WritePin(g2_GPIO_Port, g2_Pin, GPIO_PIN_RESET);
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -124,16 +94,97 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start_IT(&htim2);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  // set initial state for traffic light
+  HAL_GPIO_WritePin(CLOCK_CHECK_GPIO_Port, CLOCK_CHECK_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(RED1_GPIO_Port, RED1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(YELLOW1_GPIO_Port, YELLOW1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GREEN1_GPIO_Port, GREEN1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(RED2_GPIO_Port, RED2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(YELLOW2_GPIO_Port, YELLOW2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GREEN2_GPIO_Port, GREEN2_Pin, GPIO_PIN_SET);
+  // set initial state for enable pin
+  HAL_GPIO_WritePin(EN0_GPIO_Port, EN0_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, GPIO_PIN_SET);
+  set_timer3(500);
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  // timer flag 0 has time cycle of 1 second
+	  // controls the red blinking led, separate from the rest
+	  if(timer0_flag == 1)
+	  {
+		  timer0_flag = 0;
+		  HAL_GPIO_TogglePin(CLOCK_CHECK_GPIO_Port, CLOCK_CHECK_Pin);
+	  }
+	  // execute the mode
+	  switch(mode)
+	  {
+	  case 1:
+		  fsm_automatic_run();
+		  display_7SEG_automatic();
+		  if(button1_flag == 1)
+		  {
+			  button1_flag = 0;
+			  mode = 2;
+			  count = 1;
+			  HAL_GPIO_WritePin(RED1_GPIO_Port, RED1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(YELLOW1_GPIO_Port, YELLOW1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GREEN1_GPIO_Port, GREEN1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(RED2_GPIO_Port, RED2_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(YELLOW2_GPIO_Port, YELLOW2_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GREEN2_GPIO_Port, GREEN2_Pin, GPIO_PIN_SET);
+		  }
+		  break;
+	  case 2:
+		  fsm_modify_run();
+		  display_7SEG_modify();
+		  if(button1_flag == 1)
+		  {
+			  button1_flag = 0;
+			  mode = 3;
+			  count = 1;
+			  HAL_GPIO_WritePin(RED1_GPIO_Port, RED1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(RED2_GPIO_Port, RED2_Pin, GPIO_PIN_SET);
+		  }
+		  break;
+	  case 3:
+		  fsm_modify_run();
+		  display_7SEG_modify();
+		  if(button1_flag == 1)
+		  {
+			  button1_flag = 0;
+			  mode = 4;
+			  count = 1;
+			  HAL_GPIO_WritePin(YELLOW1_GPIO_Port, YELLOW1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(YELLOW2_GPIO_Port, YELLOW2_Pin, GPIO_PIN_SET);
+		  }
+		  break;
+	  case 4:
+		  fsm_modify_run();
+		  display_7SEG_modify();
+		  if(button1_flag == 1)
+		  {
+			  button1_flag = 0;
+			  mode = 1;
+			  count = 1;
+			  status1 = INIT;
+			  status2 = INIT;
+			  HAL_GPIO_WritePin(GREEN1_GPIO_Port, GREEN1_Pin, GPIO_PIN_SET);
+			  HAL_GPIO_WritePin(GREEN2_GPIO_Port, GREEN2_Pin, GPIO_PIN_SET);
+		  }
+		  break;
+	  default:
+		  mode = 1;
+		  break;
+	  }
   }
   /* USER CODE END 3 */
 }
@@ -194,7 +245,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 7999;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 9;
+  htim2.Init.Period = 10;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -232,8 +283,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, CLOCK_CHECK_Pin|RED1_Pin|YELLOW1_Pin|GREEN1_Pin
-                          |RED2_Pin|YELLOW2_Pin|GREEN2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, CLOCK_CHECK_Pin|EN0_Pin|EN1_Pin|RED1_Pin
+                          |YELLOW1_Pin|GREEN1_Pin|RED2_Pin|YELLOW2_Pin
+                          |GREEN2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, a1_Pin|b1_Pin|c1_Pin|d2_Pin
@@ -241,10 +293,12 @@ static void MX_GPIO_Init(void)
                           |e1_Pin|f1_Pin|g1_Pin|a2_Pin
                           |b2_Pin|c2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : CLOCK_CHECK_Pin RED1_Pin YELLOW1_Pin GREEN1_Pin
-                           RED2_Pin YELLOW2_Pin GREEN2_Pin */
-  GPIO_InitStruct.Pin = CLOCK_CHECK_Pin|RED1_Pin|YELLOW1_Pin|GREEN1_Pin
-                          |RED2_Pin|YELLOW2_Pin|GREEN2_Pin;
+  /*Configure GPIO pins : CLOCK_CHECK_Pin EN0_Pin EN1_Pin RED1_Pin
+                           YELLOW1_Pin GREEN1_Pin RED2_Pin YELLOW2_Pin
+                           GREEN2_Pin */
+  GPIO_InitStruct.Pin = CLOCK_CHECK_Pin|EN0_Pin|EN1_Pin|RED1_Pin
+                          |YELLOW1_Pin|GREEN1_Pin|RED2_Pin|YELLOW2_Pin
+                          |GREEN2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -253,7 +307,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : BUTTON1_Pin BUTTON2_Pin BUTTON3_Pin */
   GPIO_InitStruct.Pin = BUTTON1_Pin|BUTTON2_Pin|BUTTON3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : a1_Pin b1_Pin c1_Pin d2_Pin
@@ -272,7 +326,13 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * htim)
+{
+	timer_run();
+	getKeyInput1();
+	getKeyInput2();
+	getKeyInput3();
+}
 /* USER CODE END 4 */
 
 /**

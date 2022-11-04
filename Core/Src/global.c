@@ -5,4 +5,7 @@
  *      Author: Cuong
  */
 
+#include "global.h"
 
+int mode = 1;
+int count = 1;
