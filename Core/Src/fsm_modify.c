@@ -13,9 +13,10 @@ void fsm_modify_run()
 	{
 	case 2:
 		// blinking red led
-		if(timer3_flag == 1)
+		if(timer1_flag == 1)
 		{
-			timer3_flag = 0;
+			timer1_flag = 0;
+			set_timer1(500);
 			HAL_GPIO_TogglePin(RED1_GPIO_Port, RED1_Pin);
 			HAL_GPIO_TogglePin(RED2_GPIO_Port, RED2_Pin);
 		}
@@ -36,9 +37,10 @@ void fsm_modify_run()
 		break;
 	case 3:
 		// blinking yellow led
-		if(timer3_flag == 1)
+		if(timer1_flag == 1)
 		{
-			timer3_flag = 0;
+			timer1_flag = 0;
+			set_timer1(500);
 			HAL_GPIO_TogglePin(YELLOW1_GPIO_Port, YELLOW1_Pin);
 			HAL_GPIO_TogglePin(YELLOW2_GPIO_Port, YELLOW2_Pin);
 		}
@@ -59,9 +61,10 @@ void fsm_modify_run()
 		break;
 	case 4:
 		// blinking green led
-		if(timer3_flag == 1)
+		if(timer1_flag == 1)
 		{
-			timer3_flag = 0;
+			timer1_flag = 0;
+			set_timer1(500);
 			HAL_GPIO_TogglePin(GREEN1_GPIO_Port, GREEN1_Pin);
 			HAL_GPIO_TogglePin(GREEN2_GPIO_Port, GREEN2_Pin);
 		}

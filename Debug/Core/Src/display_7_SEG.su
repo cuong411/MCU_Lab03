@@ -1,4 +1,4 @@
 display_7_SEG.c:14:6:display7SEG1	16	static
 display_7_SEG.c:33:6:display7SEG2	16	static
-display_7_SEG.c:52:6:display_7SEG_automatic	16	static
+display_7_SEG.c:52:6:display_7SEG_automatic	8	static
 display_7_SEG.c:87:6:display_7SEG_modify	8	static

@@ -26,15 +26,20 @@
 #define MOD_GREEN	13
 #define MOD_YELLOW	14
 
+// status of traffic light
 extern int status1;
 extern int status2;
 
-// duration of traffic led
+// duration of traffic light
 extern int timer_red;
 extern int timer_yellow;
 extern int timer_green;
 
-// mod section
+// count down value of 7 segment led
+extern int countdown0;
+extern int countdown1;
+
+// mod variable
 extern int mode;
 extern int count;
 

@@ -8,8 +8,8 @@
 #include "display_7_SEG.h"
 
 int enabled_7SEG = EN0;
-int mode;
-int count;
+int countdown0 = 0;
+int countdown1 = 0;
 
 void display7SEG1(int num)
 {
@@ -56,27 +56,27 @@ void display_7SEG_automatic()
 	case EN0:
 		HAL_GPIO_WritePin(EN0_GPIO_Port, EN0_Pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, GPIO_PIN_SET);
+		display7SEG1(countdown0 / 10);
+		display7SEG2(countdown0 % 10);
 		if(timer3_flag == 1)
 		{
 			timer3_flag = 0;
-			int countdown1 = timer2_counter / 1000 * TICK;
-			display7SEG1(countdown1 / 10);
-			display7SEG2(countdown1 % 10);
-			enabled_7SEG = EN1;
 			set_timer3(500);
+			enabled_7SEG = EN1;
+			countdown0--;
 		}
 		break;
 	case EN1:
 		HAL_GPIO_WritePin(EN0_GPIO_Port, EN0_Pin, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin, GPIO_PIN_RESET);
+		display7SEG1(countdown1 / 10);
+		display7SEG2(countdown1 % 10);
 		if(timer3_flag == 1)
 		{
 			timer3_flag = 0;
-			int countdown0 = timer1_counter / 1000 * TICK;;
-			display7SEG1(countdown0 / 10);
-			display7SEG2(countdown0 % 10);
-			enabled_7SEG = EN0;
 			set_timer3(500);
+			enabled_7SEG = EN0;
+			countdown1--;
 		}
 		break;
 	default:
@@ -96,8 +96,8 @@ void display_7SEG_modify()
 		if(timer3_flag == 1)
 		{
 			timer3_flag = 0;
-			enabled_7SEG = EN1;
 			set_timer3(500);
+			enabled_7SEG = EN1;
 		}
 		break;
 	case EN1:
@@ -108,8 +108,8 @@ void display_7SEG_modify()
 		if(timer3_flag == 1)
 		{
 			timer3_flag = 0;
-			enabled_7SEG = EN0;
 			set_timer3(500);
+			enabled_7SEG = EN0;
 		}
 		break;
 
