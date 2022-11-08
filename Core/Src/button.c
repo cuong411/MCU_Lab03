@@ -12,7 +12,6 @@ int KeyReg1 = NORMAL_STATE;
 int KeyReg2 = NORMAL_STATE;
 int KeyReg3 = NORMAL_STATE;
 
-int TimeOutForKeyPress = 500;
 int button1_flag = 0;
 int button2_flag = 0;
 int button3_flag = 0;
@@ -26,21 +25,34 @@ void getKeyInput1()
 	if(HAL_GPIO_ReadPin(BUTTON1_GPIO_Port, BUTTON1_Pin) == GPIO_PIN_RESET)
 	{
 		button1_count++;
-		if(button1_count == 3)
+		if(button1_count == 40 / TICK)
 		{
 			button1_flag = 1;
 		}
 	}
 	else
 	{
-		if(button1_count < 3)
-		{
-			button1_flag = 0;
-		}
 		button1_count = 0;
 	}
 }
 
+void getKeyInput2()
+{
+    if(HAL_GPIO_ReadPin(BUTTON2_GPIO_Port, BUTTON2_Pin) == GPIO_PIN_RESET)
+    {
+        button2_count++;
+        if(button2_count == (40 / TICK))
+        {
+            button2_flag = 1;
+        }
+    }
+    else
+    {
+        button2_count = 0;
+    }
+}
+
+/*
 void getKeyInput2()
 {
 	KeyReg2 = KeyReg1;
@@ -68,23 +80,20 @@ void getKeyInput2()
 		button2_flag = 0;
 	}
 }
+*/
 
 void getKeyInput3()
 {
 	if(HAL_GPIO_ReadPin(BUTTON3_GPIO_Port, BUTTON3_Pin) == GPIO_PIN_RESET)
 	{
 		button3_count++;
-		if(button3_count == 3)
+		if(button3_count == 40 / TICK)
 		{
 			button3_flag = 1;
 		}
 	}
 	else
 	{
-		if(button3_count < 3)
-		{
-			button3_flag = 0;
-		}
 		button3_count = 0;
 	}
 }
